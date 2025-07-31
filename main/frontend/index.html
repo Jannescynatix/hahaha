@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Media Hub</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+</head>
+<body>
+
+<header class="hero">
+    <div class="hero-content">
+        <h1>My Media Hub</h1>
+        <p>Deine persönliche Mediensammlung – einfach verwalten.</p>
+        <div class="header-controls">
+            <input type="text" id="search-bar" placeholder="Suchen...">
+            <button id="upload-button">Upload</button>
+        </div>
+    </div>
+</header>
+
+<main>
+    <aside id="filter-sidebar">
+        <button id="toggle-filter-button">Filter</button>
+        <div class="filter-content">
+            <h2>Filter</h2>
+            <div class="filter-group">
+                <label for="filter-type">Typ:</label>
+                <select id="filter-type">
+                    <option value="all">Alle</option>
+                    <option value="image">Bilder</option>
+                    <option value="video">Videos</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="filter-tags">Tags (kommagetrennt):</label>
+                <input type="text" id="filter-tags" placeholder="z.B. Urlaub, Natur">
+            </div>
+        </div>
+    </aside>
+
+    <section id="media-content">
+        <div id="media-grid">
+        </div>
+        <div id="loading-spinner" class="spinner"></div>
+        <div id="no-media-message" class="info-message"></div>
+        <div id="pagination-controls">
+            <button id="prev-page" disabled>Vorherige</button>
+            <span id="page-info">Seite 1 von 1</span>
+            <button id="next-page" disabled>Nächste</button>
+        </div>
+    </section>
+</main>
+
+<div id="media-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-button" id="modal-close-button">&times;</span>
+        <div id="modal-viewer"></div>
+        <div id="modal-info">
+            <h3 id="modal-title"></h3>
+            <p>Tags: <span id="modal-tags"></span></p>
+            <p>Beschreibung: <span id="modal-description"></span></p>
+            <p>Hochgeladen: <span id="modal-date"></span></p>
+            <div class="modal-actions">
+                <button id="edit-button" class="action-button">Bearbeiten</button>
+                <button id="delete-button" class="delete-button">Löschen</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="upload-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-button" id="upload-close-button">&times;</span>
+        <h2>Medien hochladen</h2>
+        <form id="upload-form">
+            <label for="file-input">Datei auswählen:</label>
+            <input type="file" id="file-input" required>
+            <label for="title-input">Titel:</label>
+            <input type="text" id="title-input" required>
+            <label for="tags-input">Tags (mit Komma trennen):</label>
+            <input type="text" id="tags-input">
+            <label for="description-input">Beschreibung:</label>
+            <textarea id="description-input"></textarea>
+            <button type="submit">Hochladen</button>
+        </form>
+    </div>
+</div>
+
+<div id="edit-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-button" id="edit-close-button">&times;</span>
+        <h2>Medium bearbeiten</h2>
+        <form id="edit-form">
+            <label for="edit-title-input">Titel:</label>
+            <input type="text" id="edit-title-input" required>
+            <label for="edit-tags-input">Tags (mit Komma trennen):</label>
+            <input type="text" id="edit-tags-input">
+            <label for="edit-description-input">Beschreibung:</label>
+            <textarea id="edit-description-input"></textarea>
+            <button type="submit">Speichern</button>
+        </form>
+    </div>
+</div>
+
+<div id="notification-bar" class="notification-bar"></div>
+
+<script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js')
+                .then(registration => {
+                    console.log('Service Worker registriert mit Scope:', registration.scope);
+                })
+                .catch(err => {
+                    console.log('Service Worker Registrierung fehlgeschlagen:', err);
+                });
+        });
+    }
+</script>
+<script src="script.js"></script>
+</body>
+</html>
