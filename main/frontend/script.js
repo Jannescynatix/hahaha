@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const backendBaseUrl = 'http://localhost:3001';
+    const backendBaseUrl = 'https://hahaha-fbgk.onrender.com';
     const mediaGrid = document.getElementById('media-grid');
     const searchBar = document.getElementById('search-bar');
     const filterType = document.getElementById('filter-type');
