@@ -57,7 +57,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const newPasswordInput = document.getElementById('new-password');
     const confirmNewPasswordInput = document.getElementById('confirm-new-password');
 
-    // NEU: Elemente für den Datei-Input
+    // NEU: Mobiler Button für Passwort ändern
+    const changePasswordButtonMobile = document.getElementById('change-password-button-mobile');
+
     const fileInput = document.getElementById('file-input');
     const fileNameDisplay = document.getElementById('file-name');
 
@@ -204,9 +206,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    changePasswordButton.addEventListener('click', () => {
+    const showChangePasswordModal = () => {
         changePasswordModal.classList.add('visible');
-    });
+    };
+
+    changePasswordButton.addEventListener('click', showChangePasswordModal);
+    // NEU: Event-Listener für mobilen Button
+    changePasswordButtonMobile.addEventListener('click', showChangePasswordModal);
+
     changePasswordCloseButton.addEventListener('click', closeAllModals);
     changePasswordForm.addEventListener('submit', async (event) => {
         event.preventDefault();
@@ -299,7 +306,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const showUploadModal = () => {
         uploadModal.classList.add('visible');
-        fileNameDisplay.textContent = ''; // Dateinamen beim Öffnen zurücksetzen
+        fileNameDisplay.textContent = '';
     };
     uploadButton.addEventListener('click', showUploadModal);
     uploadButtonMobile.addEventListener('click', showUploadModal);
@@ -308,7 +315,6 @@ document.addEventListener('DOMContentLoaded', () => {
     editCloseButton.addEventListener('click', closeAllModals);
     changePasswordCloseButton.addEventListener('click', closeAllModals);
 
-    // NEU: Event-Listener für den Datei-Input, um den Dateinamen anzuzeigen
     fileInput.addEventListener('change', () => {
         if (fileInput.files.length > 0) {
             fileNameDisplay.textContent = fileInput.files[0].name;
