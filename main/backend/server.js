@@ -3,6 +3,7 @@ const multer = require('multer');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const cloudinary = require('cloudinary').v2;
+const bcrypt = require('bcryptjs'); // NEU: für die Passwort-Verschlüsselung
 
 dotenv.config();
 
@@ -16,19 +17,53 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-// In-Memory "Datenbank" für schnellen Start
+// In-Memory "Datenbank"
 let mediaData = [];
 let mediaId = 1;
+// NEU: Session-Variable und gehashtes Passwort
+let isAuthenticated = false;
+let adminPasswordHash = process.env.ADMIN_PASSWORD ? bcrypt.hashSync(process.env.ADMIN_PASSWORD, 10) : null;
 
-// Multer in-memory storage, um Dateien vor dem Upload zu Cloudinary zu speichern
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 app.use(cors());
 app.use(express.json());
 
-// POST-Endpunkt zum Hochladen von Dateien
-app.post('/api/upload', upload.single('mediaFile'), async (req, res) => {
+// NEU: Middleware zur Überprüfung der Authentifizierung
+const checkAuth = (req, res, next) => {
+    if (isAuthenticated) {
+        next();
+    } else {
+        res.status(401).send('Nicht autorisiert. Bitte loggen Sie sich ein.');
+    }
+};
+
+// NEU: Endpunkt für Login
+app.post('/api/login', (req, res) => {
+    const { password } = req.body;
+    if (adminPasswordHash && bcrypt.compareSync(password, adminPasswordHash)) {
+        isAuthenticated = true; // Setzt die Session-Variable
+        res.status(200).send('Login erfolgreich!');
+    } else {
+        res.status(401).send('Falsches Passwort.');
+    }
+});
+
+// NEU: Endpunkt zum Ändern des Passworts
+app.put('/api/password', checkAuth, (req, res) => {
+    const { oldPassword, newPassword } = req.body;
+    if (bcrypt.compareSync(oldPassword, adminPasswordHash)) {
+        adminPasswordHash = bcrypt.hashSync(newPassword, 10);
+        res.status(200).send('Passwort erfolgreich geändert.');
+    } else {
+        res.status(401).send('Altes Passwort ist falsch.');
+    }
+});
+
+// NEU: Einbindung der Middleware in alle geschützten Routen
+app.post('/api/upload', checkAuth, upload.single('mediaFile'), async (req, res) => {
+    // ... der gleiche Upload-Code wie zuvor ...
     if (!req.file) {
         return res.status(400).send('Keine Datei hochgeladen.');
     }
@@ -36,7 +71,7 @@ app.post('/api/upload', upload.single('mediaFile'), async (req, res) => {
     try {
         const result = await cloudinary.uploader.upload(
             `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`,
-            { resource_type: "auto" } // Erkennt automatisch, ob es ein Bild oder Video ist
+            { resource_type: "auto" }
         );
 
         const { title, tags, description } = req.body;
@@ -62,8 +97,8 @@ app.post('/api/upload', upload.single('mediaFile'), async (req, res) => {
     }
 });
 
-// DELETE-Endpunkt zum Löschen eines Mediums
-app.delete('/api/media/:id', async (req, res) => {
+app.delete('/api/media/:id', checkAuth, async (req, res) => {
+    // ... der gleiche Lösch-Code wie zuvor ...
     const mediaId = parseInt(req.params.id);
     const mediaIndex = mediaData.findIndex(m => m.id === mediaId);
 
@@ -72,7 +107,6 @@ app.delete('/api/media/:id', async (req, res) => {
     }
 
     try {
-        // Extrahiert die "public_id" aus der URL, um die Datei zu löschen
         const publicId = mediaData[mediaIndex].url.split('/').pop().split('.')[0];
         await cloudinary.uploader.destroy(publicId, { resource_type: mediaData[mediaIndex].type });
 
@@ -84,8 +118,8 @@ app.delete('/api/media/:id', async (req, res) => {
     }
 });
 
-// GET-Endpunkt, um Medien abzurufen (mit Suche und Filter)
-app.get('/api/media', (req, res) => {
+app.get('/api/media', checkAuth, (req, res) => {
+    // ... der gleiche GET-Code wie zuvor ...
     let filteredMedia = mediaData;
     const { search, type, tags, page = 1, limit = 20 } = req.query;
     const pageNum = parseInt(page);
@@ -124,7 +158,8 @@ app.get('/api/media', (req, res) => {
     });
 });
 
-app.get('/api/media/:id', (req, res) => {
+app.get('/api/media/:id', checkAuth, (req, res) => {
+    // ... der gleiche GET-ID-Code wie zuvor ...
     const mediaId = parseInt(req.params.id);
     const media = mediaData.find(m => m.id === mediaId);
     if (!media) {
@@ -133,7 +168,8 @@ app.get('/api/media/:id', (req, res) => {
     res.json(media);
 });
 
-app.put('/api/media/:id', (req, res) => {
+app.put('/api/media/:id', checkAuth, (req, res) => {
+    // ... der gleiche PUT-Code wie zuvor ...
     const mediaId = parseInt(req.params.id);
     const mediaIndex = mediaData.findIndex(m => m.id === mediaId);
     if (mediaIndex === -1) {

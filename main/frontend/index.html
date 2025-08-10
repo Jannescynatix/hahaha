@@ -12,70 +12,102 @@
 </head>
 <body>
 
-<header class="hero">
-    <div class="hero-content">
-        <h1>My Media Hub</h1>
-        <p>Deine persönliche Mediensammlung – einfach verwalten.</p>
-        <div class="header-controls">
-            <input type="text" id="search-bar" placeholder="Suchen..." aria-label="Suche">
+<div id="app-container" class="hidden">
+    <header class="hero">
+        <div class="hero-content">
+            <h1>My Media Hub</h1>
+            <p>Deine persönliche Mediensammlung – einfach verwalten.</p>
+            <div class="header-controls">
+                <input type="text" id="search-bar" placeholder="Suchen..." aria-label="Suche">
+                <button id="upload-button" class="action-button mobile-hidden">Upload</button>
+                <button id="change-password-button" class="action-button mobile-hidden">Passwort ändern</button>
+            </div>
         </div>
-    </div>
-</header>
+    </header>
 
-<main>
-    <div class="main-container">
-        <aside id="filter-sidebar" class="sidebar">
-            <button id="close-sidebar-button" class="close-button">&times;</button>
-            <h2>Filter</h2>
-            <div class="filter-group">
-                <label for="filter-type">Typ:</label>
-                <select id="filter-type">
-                    <option value="all">Alle</option>
-                    <option value="image">Bilder</option>
-                    <option value="video">Videos</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label for="filter-tags">Tags (kommagetrennt):</label>
-                <input type="text" id="filter-tags" placeholder="z.B. Urlaub, Natur">
-            </div>
-        </aside>
+    <main>
+        <div class="main-container">
+            <aside id="filter-sidebar" class="sidebar">
+                <button id="close-sidebar-button" class="close-button">&times;</button>
+                <h2>Filter</h2>
+                <div class="filter-group">
+                    <label for="filter-type">Typ:</label>
+                    <select id="filter-type">
+                        <option value="all">Alle</option>
+                        <option value="image">Bilder</option>
+                        <option value="video">Videos</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filter-tags">Tags (kommagetrennt):</label>
+                    <input type="text" id="filter-tags" placeholder="z.B. Urlaub, Natur">
+                </div>
+            </aside>
 
-        <section id="media-content">
-            <div class="mobile-controls">
-                <button id="open-sidebar-button" class="sidebar-toggle-button">Filter</button>
-                <button id="upload-button" class="action-button">Upload</button>
-            </div>
+            <section id="media-content">
+                <div class="mobile-controls">
+                    <button id="open-sidebar-button" class="sidebar-toggle-button">Filter</button>
+                    <button id="upload-button-mobile" class="action-button">Upload</button>
+                </div>
 
-            <div id="media-grid">
-            </div>
-            <div id="loading-spinner" class="spinner"></div>
-            <div id="no-media-message" class="info-message"></div>
-            <div id="pagination-controls">
-                <button id="prev-page" disabled>Vorherige</button>
-                <span id="page-info">Seite 1 von 1</span>
-                <button id="next-page" disabled>Nächste</button>
-            </div>
-        </section>
-    </div>
-</main>
+                <div id="media-grid">
+                </div>
+                <div id="loading-spinner" class="spinner"></div>
+                <div id="no-media-message" class="info-message"></div>
+                <div id="pagination-controls">
+                    <button id="prev-page" disabled>Vorherige</button>
+                    <span id="page-info">Seite 1 von 1</span>
+                    <button id="next-page" disabled>Nächste</button>
+                </div>
+            </section>
+        </div>
+    </main>
 
-<div id="media-modal" class="modal">
-    <div class="modal-content media-view-modal">
-        <span class="close-button" id="modal-close-button">&times;</span>
-        <div id="modal-viewer"></div>
-        <div id="modal-info">
-            <h3 id="modal-title"></h3>
-            <p>Tags: <span id="modal-tags"></span></p>
-            <p>Beschreibung: <span id="modal-description"></span></p>
-            <p>Hochgeladen: <span id="modal-date"></span></p>
-            <div class="modal-actions">
-                <button id="edit-button" class="action-button">Bearbeiten</button>
-                <button id="delete-button" class="delete-button">Löschen</button>
+    <div id="media-modal" class="modal">
+        <div class="modal-content media-view-modal">
+            <span class="close-button" id="modal-close-button">&times;</span>
+            <div id="modal-viewer"></div>
+            <div id="modal-info">
+                <h3 id="modal-title"></h3>
+                <p>Tags: <span id="modal-tags"></span></p>
+                <p>Beschreibung: <span id="modal-description"></span></p>
+                <p>Hochgeladen: <span id="modal-date"></span></p>
+                <div class="modal-actions">
+                    <button id="edit-button" class="action-button">Bearbeiten</button>
+                    <button id="delete-button" class="delete-button">Löschen</button>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<div id="login-modal" class="modal visible">
+    <div class="modal-content login-content">
+        <h2>Zugang erforderlich</h2>
+        <form id="login-form">
+            <label for="login-password">Passwort:</label>
+            <input type="password" id="login-password" required>
+            <button type="submit" class="action-button">Einloggen</button>
+        </form>
+    </div>
+</div>
+
+<div id="change-password-modal" class="modal">
+    <div class="modal-content edit-password-content">
+        <span class="close-button" id="change-password-close-button">&times;</span>
+        <h2>Passwort ändern</h2>
+        <form id="change-password-form">
+            <label for="old-password">Altes Passwort:</label>
+            <input type="password" id="old-password" required>
+            <label for="new-password">Neues Passwort:</label>
+            <input type="password" id="new-password" required>
+            <label for="confirm-new-password">Neues Passwort bestätigen:</label>
+            <input type="password" id="confirm-new-password" required>
+            <button type="submit" class="action-button">Speichern</button>
+        </form>
+    </div>
+</div>
+
 
 <div id="upload-modal" class="modal">
     <div class="modal-content upload-modal">

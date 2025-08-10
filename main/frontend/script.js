@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const backendBaseUrl = 'https://hahaha-fbgk.onrender.com';
+    const appContainer = document.getElementById('app-container');
     const mediaGrid = document.getElementById('media-grid');
     const searchBar = document.getElementById('search-bar');
     const filterType = document.getElementById('filter-type');
@@ -8,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const noMediaMessage = document.getElementById('no-media-message');
 
     const uploadButton = document.getElementById('upload-button');
+    const uploadButtonMobile = document.getElementById('upload-button-mobile');
     const uploadModal = document.getElementById('upload-modal');
     const uploadCloseButton = document.getElementById('upload-close-button');
     const uploadForm = document.getElementById('upload-form');
@@ -43,6 +45,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const notificationBar = document.getElementById('notification-bar');
 
+    // NEU: Login-Elemente
+    const loginModal = document.getElementById('login-modal');
+    const loginForm = document.getElementById('login-form');
+    const loginPasswordInput = document.getElementById('login-password');
+
+    // NEU: Passwort-ändern-Elemente
+    const changePasswordButton = document.getElementById('change-password-button');
+    const changePasswordModal = document.getElementById('change-password-modal');
+    const changePasswordCloseButton = document.getElementById('change-password-close-button');
+    const changePasswordForm = document.getElementById('change-password-form');
+
     let currentMediaId = null;
     let currentPage = 1;
     const mediaPerPage = 20;
@@ -64,26 +77,6 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
             notificationBar.classList.remove('visible');
         }, 3000);
-    };
-
-    const createVideoThumbnail = (videoFile) => {
-        return new Promise((resolve, reject) => {
-            const video = document.createElement('video');
-            video.src = URL.createObjectURL(videoFile);
-            video.preload = 'metadata';
-            video.currentTime = 1;
-            video.onloadeddata = () => {
-                const canvas = document.createElement('canvas');
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                const dataUrl = canvas.toDataURL('image/jpeg');
-                URL.revokeObjectURL(video.src);
-                resolve(dataUrl);
-            };
-            video.onerror = () => reject('Fehler beim Laden des Videos.');
-        });
     };
 
     const renderMedia = (media) => {
@@ -144,10 +137,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             const response = await fetch(url);
-            if (!response.ok) throw new Error('Netzwerkfehler');
+            if (!response.ok) {
+                // Bei 401 unautorisiert -> Login anzeigen
+                if (response.status === 401) {
+                    appContainer.classList.add('hidden');
+                    loginModal.classList.add('visible');
+                    return;
+                }
+                throw new Error('Netzwerkfehler');
+            }
             const data = await response.json();
             renderMedia(data.media);
             updatePaginationControls(data.currentPage, data.totalPages);
+            appContainer.classList.remove('hidden');
         } catch (error) {
             console.error('Fehler beim Abrufen der Medien:', error);
             noMediaMessage.textContent = 'Fehler beim Laden der Medien. Bitte prüfen Sie, ob der Server läuft.';
@@ -171,6 +173,67 @@ document.addEventListener('DOMContentLoaded', () => {
         modalViewer.innerHTML = '';
         currentMediaId = null;
     };
+
+    // NEU: Login-Funktion
+    loginForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const password = loginPasswordInput.value;
+
+        try {
+            const response = await fetch(`${backendBaseUrl}/api/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password })
+            });
+
+            if (response.ok) {
+                showNotification('Login erfolgreich!');
+                loginModal.classList.remove('visible');
+                fetchMedia(); // Lade Medien nach erfolgreichem Login
+            } else {
+                showNotification('Falsches Passwort.', 'error');
+            }
+        } catch (error) {
+            console.error('Login-Fehler:', error);
+            showNotification('Login fehlgeschlagen. Netzwerkproblem?', 'error');
+        }
+    });
+
+    // NEU: Passwort-ändern-Funktion
+    changePasswordButton.addEventListener('click', () => {
+        changePasswordModal.classList.add('visible');
+    });
+    changePasswordCloseButton.addEventListener('click', closeAllModals);
+    changePasswordForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const oldPassword = changePasswordForm['old-password'].value;
+        const newPassword = changePasswordForm['new-password'].value;
+        const confirmNewPassword = changePasswordForm['confirm-new-password'].value;
+
+        if (newPassword !== confirmNewPassword) {
+            showNotification('Neue Passwörter stimmen nicht überein.', 'error');
+            return;
+        }
+
+        try {
+            const response = await fetch(`${backendBaseUrl}/api/password`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ oldPassword, newPassword })
+            });
+
+            if (response.ok) {
+                showNotification('Passwort erfolgreich geändert.');
+                changePasswordForm.reset();
+                closeAllModals();
+            } else {
+                showNotification('Altes Passwort ist falsch.', 'error');
+            }
+        } catch (error) {
+            console.error('Passwort-Änderung fehlgeschlagen:', error);
+            showNotification('Passwort-Änderung fehlgeschlagen.', 'error');
+        }
+    });
 
     // Sidebar-Logik für Mobilgeräte
     openSidebarButton.addEventListener('click', () => {
@@ -232,9 +295,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    uploadButton.addEventListener('click', () => {
-        uploadModal.classList.add('visible');
-    });
+    const showUploadModal = () => uploadModal.classList.add('visible');
+    uploadButton.addEventListener('click', showUploadModal);
+    uploadButtonMobile.addEventListener('click', showUploadModal);
 
     uploadCloseButton.addEventListener('click', closeAllModals);
     modalCloseButton.addEventListener('click', closeAllModals);
@@ -255,7 +318,6 @@ document.addEventListener('DOMContentLoaded', () => {
         formData.append('tags', uploadForm['tags-input'].value);
         formData.append('description', uploadForm['description-input'].value);
 
-        // Zeigt den Fortschrittsbalken an
         uploadProgressContainer.style.display = 'block';
 
         try {
@@ -272,7 +334,6 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Upload fehlgeschlagen:', error);
             showNotification('Upload fehlgeschlagen. Bitte versuche es erneut.', 'error');
         } finally {
-            // Setzt den Fortschrittsbalken zurück und versteckt ihn
             uploadProgressBar.style.width = '0%';
             uploadProgressContainer.style.display = 'none';
         }
