@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // HINWEIS: Ersetzen Sie die URL mit der URL Ihres Render-Backends
-    const backendBaseUrl = 'https://ihr-backend-name.onrender.com';
+    const backendBaseUrl = 'https://hahaha-fbgk.onrender.com';
     const mediaGrid = document.getElementById('media-grid');
     const searchBar = document.getElementById('search-bar');
     const filterType = document.getElementById('filter-type');
