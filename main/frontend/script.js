@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const editCloseButton = document.getElementById('edit-close-button');
     const editForm = document.getElementById('edit-form');
     const editTitleInput = document.getElementById('edit-title-input');
-    const editTagsInput = document.getElementById('edit-tags-input');
+    const editTagsInput = document = document.getElementById('edit-tags-input');
     const editDescriptionInput = document.getElementById('edit-description-input');
 
     const paginationControls = document.getElementById('pagination-controls');
@@ -55,22 +55,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const changePasswordModal = document.getElementById('change-password-modal');
     const changePasswordCloseButton = document.getElementById('change-password-close-button');
     const changePasswordForm = document.getElementById('change-password-form');
+    const oldPasswordInput = document.getElementById('old-password');
+    const newPasswordInput = document.getElementById('new-password');
+    const confirmNewPasswordInput = document.getElementById('confirm-new-password');
 
     let currentMediaId = null;
     let currentPage = 1;
     const mediaPerPage = 20;
 
-    const observer = new IntersectionObserver((entries, observer) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const img = entry.target;
-                img.src = img.dataset.src;
-                img.classList.add('loaded');
-                observer.unobserve(img);
-            }
-        });
-    }, { threshold: 0.1 });
-
+    // Funktion zum Anzeigen von Toast-Benachrichtigungen
     const showNotification = (message, type = 'success') => {
         notificationBar.textContent = message;
         notificationBar.className = `notification-bar visible ${type}`;
@@ -79,6 +72,30 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 3000);
     };
 
+    // Funktion zum Schließen aller Modals
+    const closeAllModals = () => {
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.classList.remove('visible');
+        });
+        modalViewer.innerHTML = '';
+        currentMediaId = null;
+    };
+
+    // Lazy-Loading-Funktion für Bilder und Videos
+    const observer = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const mediaElement = entry.target;
+                if (mediaElement.dataset.src) {
+                    mediaElement.src = mediaElement.dataset.src;
+                    mediaElement.classList.add('loaded');
+                }
+                observer.unobserve(mediaElement);
+            }
+        });
+    }, { threshold: 0.1 });
+
+    // Funktion zum Rendern der Medien
     const renderMedia = (media) => {
         mediaGrid.innerHTML = '';
         if (media.length === 0) {
@@ -120,6 +137,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
+    // Funktion zum Abrufen der Medien vom Backend
     const fetchMedia = async () => {
         loadingSpinner.style.display = 'block';
         mediaGrid.innerHTML = '';
@@ -138,7 +156,6 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch(url);
             if (!response.ok) {
-                // Bei 401 unautorisiert -> Login anzeigen
                 if (response.status === 401) {
                     appContainer.classList.add('hidden');
                     loginModal.classList.add('visible');
@@ -166,15 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
         paginationControls.style.display = total > 1 ? 'flex' : 'none';
     };
 
-    const closeAllModals = () => {
-        document.querySelectorAll('.modal').forEach(modal => {
-            modal.classList.remove('visible');
-        });
-        modalViewer.innerHTML = '';
-        currentMediaId = null;
-    };
-
-    // NEU: Login-Funktion
+    // Event-Listener für Login
     loginForm.addEventListener('submit', async (event) => {
         event.preventDefault();
         const password = loginPasswordInput.value;
@@ -189,7 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.ok) {
                 showNotification('Login erfolgreich!');
                 loginModal.classList.remove('visible');
-                fetchMedia(); // Lade Medien nach erfolgreichem Login
+                fetchMedia();
             } else {
                 showNotification('Falsches Passwort.', 'error');
             }
@@ -199,16 +208,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // NEU: Passwort-ändern-Funktion
+    // Event-Listener für Passwortänderung
     changePasswordButton.addEventListener('click', () => {
         changePasswordModal.classList.add('visible');
     });
     changePasswordCloseButton.addEventListener('click', closeAllModals);
     changePasswordForm.addEventListener('submit', async (event) => {
         event.preventDefault();
-        const oldPassword = changePasswordForm['old-password'].value;
-        const newPassword = changePasswordForm['new-password'].value;
-        const confirmNewPassword = changePasswordForm['confirm-new-password'].value;
+        const oldPassword = oldPasswordInput.value;
+        const newPassword = newPasswordInput.value;
+        const confirmNewPassword = confirmNewPasswordInput.value;
 
         if (newPassword !== confirmNewPassword) {
             showNotification('Neue Passwörter stimmen nicht überein.', 'error');
@@ -235,7 +244,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Sidebar-Logik für Mobilgeräte
+    // Event-Listener für die Sidebar
     openSidebarButton.addEventListener('click', () => {
         filterSidebar.classList.add('visible');
         overlay.classList.add('visible');
@@ -249,18 +258,19 @@ document.addEventListener('DOMContentLoaded', () => {
         overlay.classList.remove('visible');
     });
 
+    // Event-Listener für die Paginierung
     prevPageButton.addEventListener('click', () => {
         if (currentPage > 1) {
             currentPage--;
             fetchMedia();
         }
     });
-
     nextPageButton.addEventListener('click', () => {
         currentPage++;
         fetchMedia();
     });
 
+    // Event-Listener für die Medien-Grid-Ansicht
     mediaGrid.addEventListener('click', async (event) => {
         const mediaCard = event.target.closest('.media-card');
         if (mediaCard) {
@@ -295,17 +305,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Event-Listener für den Upload-Button
     const showUploadModal = () => uploadModal.classList.add('visible');
     uploadButton.addEventListener('click', showUploadModal);
     uploadButtonMobile.addEventListener('click', showUploadModal);
-
     uploadCloseButton.addEventListener('click', closeAllModals);
-    modalCloseButton.addEventListener('click', closeAllModals);
-    editCloseButton.addEventListener('click', closeAllModals);
 
     uploadForm.addEventListener('submit', async (event) => {
         event.preventDefault();
-
         const fileInput = document.getElementById('file-input');
         if (!fileInput.files.length) {
             showNotification('Bitte eine Datei auswählen.', 'error');
@@ -339,6 +346,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Event-Listener für Löschen und Bearbeiten
     deleteButton.addEventListener('click', async () => {
         if (confirm('Bist du sicher, dass du dieses Medium löschen möchtest?')) {
             try {
@@ -390,7 +398,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    fetchMedia();
+    // Event-Listener für die Suche und Filter
     searchBar.addEventListener('input', () => {
         currentPage = 1;
         fetchMedia();
@@ -403,4 +411,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentPage = 1;
         fetchMedia();
     });
+
+    // Initialer Aufruf
+    fetchMedia();
 });

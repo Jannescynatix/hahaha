@@ -79,6 +79,43 @@
             </div>
         </div>
     </div>
+
+    <div id="upload-modal" class="modal">
+        <div class="modal-content upload-modal">
+            <span class="close-button" id="upload-close-button">&times;</span>
+            <h2>Medien hochladen</h2>
+            <form id="upload-form">
+                <label for="file-input">Datei auswählen:</label>
+                <input type="file" id="file-input" required>
+                <label for="title-input">Titel:</label>
+                <input type="text" id="title-input" required>
+                <label for="tags-input">Tags (mit Komma trennen):</label>
+                <input type="text" id="tags-input">
+                <label for="description-input">Beschreibung:</label>
+                <textarea id="description-input"></textarea>
+                <div id="upload-progress-container" class="progress-container">
+                    <div id="upload-progress-bar" class="progress-bar"></div>
+                </div>
+                <button type="submit" class="action-button">Hochladen</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="edit-modal" class="modal">
+        <div class="modal-content edit-modal">
+            <span class="close-button" id="edit-close-button">&times;</span>
+            <h2>Medium bearbeiten</h2>
+            <form id="edit-form">
+                <label for="edit-title-input">Titel:</label>
+                <input type="text" id="edit-title-input" required>
+                <label for="edit-tags-input">Tags (mit Komma trennen):</label>
+                <input type="text" id="edit-tags-input">
+                <label for="edit-description-input">Beschreibung:</label>
+                <textarea id="edit-description-input"></textarea>
+                <button type="submit" class="action-button">Speichern</button>
+            </form>
+        </div>
+    </div>
 </div>
 
 <div id="login-modal" class="modal visible">
@@ -104,44 +141,6 @@
             <label for="confirm-new-password">Neues Passwort bestätigen:</label>
             <input type="password" id="confirm-new-password" required>
             <button type="submit" class="action-button">Speichern</button>
-        </form>
-    </div>
-</div>
-
-
-<div id="upload-modal" class="modal">
-    <div class="modal-content upload-modal">
-        <span class="close-button" id="upload-close-button">&times;</span>
-        <h2>Medien hochladen</h2>
-        <form id="upload-form">
-            <label for="file-input">Datei auswählen:</label>
-            <input type="file" id="file-input" required>
-            <label for="title-input">Titel:</label>
-            <input type="text" id="title-input" required>
-            <label for="tags-input">Tags (mit Komma trennen):</label>
-            <input type="text" id="tags-input">
-            <label for="description-input">Beschreibung:</label>
-            <textarea id="description-input"></textarea>
-            <div id="upload-progress-container" class="progress-container">
-                <div id="upload-progress-bar" class="progress-bar"></div>
-            </div>
-            <button type="submit">Hochladen</button>
-        </form>
-    </div>
-</div>
-
-<div id="edit-modal" class="modal">
-    <div class="modal-content edit-modal">
-        <span class="close-button" id="edit-close-button">&times;</span>
-        <h2>Medium bearbeiten</h2>
-        <form id="edit-form">
-            <label for="edit-title-input">Titel:</label>
-            <input type="text" id="edit-title-input" required>
-            <label for="edit-tags-input">Tags (mit Komma trennen):</label>
-            <input type="text" id="edit-tags-input">
-            <label for="edit-description-input">Beschreibung:</label>
-            <textarea id="edit-description-input"></textarea>
-            <button type="submit">Speichern</button>
         </form>
     </div>
 </div>
