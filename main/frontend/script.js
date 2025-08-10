@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const backendBaseUrl = 'https://hahaha-fbgk.onrender.com';
+    // HINWEIS: Ersetzen Sie die URL mit der URL Ihres Render-Backends
+    const backendBaseUrl = 'https://ihr-backend-name.onrender.com';
     const mediaGrid = document.getElementById('media-grid');
     const searchBar = document.getElementById('search-bar');
     const filterType = document.getElementById('filter-type');
@@ -43,7 +44,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentPage = 1;
     const mediaPerPage = 20;
 
-    // Funktion zur Anzeige von Benachrichtigungen
     const showNotification = (message, type = 'success') => {
         notificationBar.textContent = message;
         notificationBar.className = `notification-bar visible ${type}`;
@@ -52,7 +52,26 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 3000);
     };
 
-    // Funktion zum Rendern der Medien-Cards
+    const createVideoThumbnail = (videoFile) => {
+        return new Promise((resolve, reject) => {
+            const video = document.createElement('video');
+            video.src = URL.createObjectURL(videoFile);
+            video.preload = 'metadata';
+            video.currentTime = 1;
+            video.onloadeddata = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const dataUrl = canvas.toDataURL('image/jpeg');
+                URL.revokeObjectURL(video.src);
+                resolve(dataUrl);
+            };
+            video.onerror = () => reject('Fehler beim Laden des Videos.');
+        });
+    };
+
     const renderMedia = (media) => {
         mediaGrid.innerHTML = '';
         if (media.length === 0) {
@@ -69,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
             mediaCard.dataset.type = item.type;
 
             let mediaElement;
-            const src = item.type === 'video' && item.thumbnail ? item.thumbnail : item.url;
+            let src = item.url;
 
             if (item.type === 'image') {
                 mediaElement = document.createElement('img');
@@ -78,7 +97,8 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 mediaElement = document.createElement('video');
                 mediaElement.src = src;
-                mediaElement.poster = item.thumbnail; // Verwende Thumbnail als Poster
+                mediaElement.poster = item.thumbnail || 'fallback-thumbnail.png'; // Fallback
+                mediaElement.alt = `Thumbnail für ${item.title}`;
             }
 
             const mediaInfo = document.createElement('div');
@@ -91,7 +111,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // Funktion zum Abrufen der Medien vom Backend
     const fetchMedia = async () => {
         loadingSpinner.style.display = 'block';
         mediaGrid.innerHTML = '';
@@ -122,19 +141,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Funktion zur Aktualisierung der Paginierungs-Controls
     const updatePaginationControls = (current, total) => {
         pageInfoSpan.textContent = `Seite ${current} von ${total}`;
         prevPageButton.disabled = current <= 1;
         nextPageButton.disabled = current >= total;
-        if (total > 1) {
-            paginationControls.style.display = 'flex';
-        } else {
-            paginationControls.style.display = 'none';
-        }
+        paginationControls.style.display = total > 1 ? 'flex' : 'none';
     };
 
-    // Modal-Funktionen
     const closeAllModals = () => {
         document.querySelectorAll('.modal').forEach(modal => {
             modal.classList.remove('visible');
@@ -143,7 +156,6 @@ document.addEventListener('DOMContentLoaded', () => {
         currentMediaId = null;
     };
 
-    // Event-Listener für die Paginierung
     prevPageButton.addEventListener('click', () => {
         if (currentPage > 1) {
             currentPage--;
@@ -156,16 +168,14 @@ document.addEventListener('DOMContentLoaded', () => {
         fetchMedia();
     });
 
-    // Event-Listener für die Sidebar auf Mobilgeräten
     toggleFilterButton.addEventListener('click', () => {
         filterSidebar.classList.toggle('visible');
     });
 
-    // Event-Listener für Klicks auf die Media-Grid
     mediaGrid.addEventListener('click', async (event) => {
         const mediaCard = event.target.closest('.media-card');
         if (mediaCard) {
-            const mediaId = parseInt(mediaCard.dataset.id);
+            const mediaId = mediaCard.dataset.id;
             try {
                 const response = await fetch(`${backendBaseUrl}/api/media/${mediaId}`);
                 if (!response.ok) throw new Error('Medienobjekt nicht gefunden');
@@ -196,17 +206,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Event-Listener für das Öffnen des Upload-Modals
     uploadButton.addEventListener('click', () => {
         uploadModal.classList.add('visible');
     });
 
-    // Event-Listener für das Schließen der Modals
     uploadCloseButton.addEventListener('click', closeAllModals);
     modalCloseButton.addEventListener('click', closeAllModals);
     editCloseButton.addEventListener('click', closeAllModals);
 
-    // Event-Listener für das Absenden des Upload-Formulars
     uploadForm.addEventListener('submit', async (event) => {
         event.preventDefault();
 
@@ -221,6 +228,15 @@ document.addEventListener('DOMContentLoaded', () => {
         formData.append('title', uploadForm['title-input'].value);
         formData.append('tags', uploadForm['tags-input'].value);
         formData.append('description', uploadForm['description-input'].value);
+
+        if (fileInput.files[0].type.startsWith('video/')) {
+            try {
+                const thumbnailDataUrl = await createVideoThumbnail(fileInput.files[0]);
+                formData.append('thumbnail', thumbnailDataUrl);
+            } catch (error) {
+                console.error(error);
+            }
+        }
 
         try {
             await fetch(`${backendBaseUrl}/api/upload`, {
@@ -238,7 +254,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Event-Listener für den Löschen-Button im Modal
     deleteButton.addEventListener('click', async () => {
         if (confirm('Bist du sicher, dass du dieses Medium löschen möchtest?')) {
             try {
@@ -255,7 +270,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Event-Listener für den Bearbeiten-Button
     editButton.addEventListener('click', async () => {
         const mediaItem = await (await fetch(`${backendBaseUrl}/api/media/${currentMediaId}`)).json();
 
@@ -267,7 +281,6 @@ document.addEventListener('DOMContentLoaded', () => {
         editModal.classList.add('visible');
     });
 
-    // Event-Listener für das Absenden des Bearbeiten-Formulars
     editForm.addEventListener('submit', async (event) => {
         event.preventDefault();
 
@@ -292,7 +305,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Initiales Laden der Medien und Event-Listener für Suche/Filter
     fetchMedia();
     searchBar.addEventListener('input', () => {
         currentPage = 1;
