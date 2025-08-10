@@ -106,12 +106,17 @@ body {
     border: 1px solid var(--border-color); border-radius: 5px; font-size: 1em; transition: all 0.3s;
 }
 .sidebar input:focus, .sidebar select:focus, .sidebar textarea:focus { outline: none; border-color: var(--accent-color); }
-.close-button {
-    position: absolute; top: 15px; right: 25px; font-size: 2em; color: var(--light-text-color);
-    cursor: pointer; transition: color 0.2s;
-}
-.close-button:hover { color: var(--text-color); }
 
+/* NEU: Verbessertes Styling für den Schließen-Button */
+.close-button {
+    position: absolute; top: 10px; right: 10px; font-size: 1.5em; color: var(--light-text-color);
+    cursor: pointer; transition: color 0.2s, transform 0.2s;
+    background-color: transparent; border: none; padding: 5px; border-radius: 50%;
+}
+.close-button:hover {
+    color: var(--text-color);
+    transform: rotate(90deg);
+}
 /* Media Content Area */
 #media-content {
     flex-grow: 1; display: flex; flex-direction: column;
@@ -132,7 +137,7 @@ body {
 .media-card {
     background-color: var(--card-bg-color); border-radius: 8px; overflow: hidden;
     box-shadow: var(--shadow-light); transition: transform 0.3s, box-shadow 0.3s;
-    cursor: pointer; position: relative; padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+    cursor: pointer; position: relative; padding-bottom: 56.25%;
 }
 .media-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-medium); }
 .media-card img, .media-card video {
@@ -189,6 +194,38 @@ body {
     height: 10px; width: 0; background-color: var(--accent-color); border-radius: 5px; transition: width 0.3s ease;
 }
 
+/* NEU: Styling für den Datei-Input */
+.file-input-wrapper {
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+    margin-top: 15px;
+}
+.file-input-wrapper input[type=file] {
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+.file-input-label {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: var(--accent-color);
+    color: white;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+.file-input-label:hover {
+    background-color: var(--accent-dark-color);
+}
+.file-name-display {
+    margin-left: 10px;
+    font-size: 1em;
+    color: var(--text-color);
+}
+
 /* Pagination & Ladezustände */
 .spinner {
     border: 4px solid rgba(0, 0, 0, 0.1); width: 36px; height: 36px; border-radius: 50%;
@@ -233,7 +270,7 @@ body {
     .hero p { font-size: 1em; }
     .header-controls { display: none; }
     .mobile-controls { display: flex; }
-    .mobile-hidden { display: none; }
+    #upload-button-mobile { display: block; }
 
     .main-container { flex-direction: column; }
     .sidebar {
@@ -249,7 +286,8 @@ body {
 }
 @media (min-width: 901px) {
     .sidebar.visible { transform: none; }
-    #open-sidebar-button, #close-sidebar-button, #upload-button-mobile { display: none; }
+    #open-sidebar-button, #upload-button-mobile { display: none; }
+    #upload-button { display: block; }
     .main-container { padding-top: 20px; }
     #media-content { padding-top: 0; }
     .sidebar { height: calc(100vh - 120px); }

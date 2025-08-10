@@ -19,8 +19,8 @@
             <p>Deine persönliche Mediensammlung – einfach verwalten.</p>
             <div class="header-controls">
                 <input type="text" id="search-bar" placeholder="Suchen..." aria-label="Suche">
-                <button id="upload-button" class="action-button mobile-hidden">Upload</button>
-                <button id="change-password-button" class="action-button mobile-hidden">Passwort ändern</button>
+                <button id="upload-button" class="action-button">Upload</button>
+                <button id="change-password-button" class="action-button">Passwort ändern</button>
             </div>
         </div>
     </header>
@@ -85,8 +85,12 @@
             <span class="close-button" id="upload-close-button">&times;</span>
             <h2>Medien hochladen</h2>
             <form id="upload-form">
-                <label for="file-input">Datei auswählen:</label>
-                <input type="file" id="file-input" required>
+                <div class="file-input-wrapper">
+                    <label for="file-input" class="action-button file-input-label">Datei auswählen...</label>
+                    <span id="file-name" class="file-name-display"></span>
+                    <input type="file" id="file-input" required>
+                </div>
+
                 <label for="title-input">Titel:</label>
                 <input type="text" id="title-input" required>
                 <label for="tags-input">Tags (mit Komma trennen):</label>

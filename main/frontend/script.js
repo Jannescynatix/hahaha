@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const editCloseButton = document.getElementById('edit-close-button');
     const editForm = document.getElementById('edit-form');
     const editTitleInput = document.getElementById('edit-title-input');
-    const editTagsInput = document = document.getElementById('edit-tags-input');
+    const editTagsInput = document.getElementById('edit-tags-input');
     const editDescriptionInput = document.getElementById('edit-description-input');
 
     const paginationControls = document.getElementById('pagination-controls');
@@ -45,12 +45,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const notificationBar = document.getElementById('notification-bar');
 
-    // NEU: Login-Elemente
     const loginModal = document.getElementById('login-modal');
     const loginForm = document.getElementById('login-form');
     const loginPasswordInput = document.getElementById('login-password');
 
-    // NEU: Passwort-ändern-Elemente
     const changePasswordButton = document.getElementById('change-password-button');
     const changePasswordModal = document.getElementById('change-password-modal');
     const changePasswordCloseButton = document.getElementById('change-password-close-button');
@@ -59,11 +57,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const newPasswordInput = document.getElementById('new-password');
     const confirmNewPasswordInput = document.getElementById('confirm-new-password');
 
+    // NEU: Elemente für den Datei-Input
+    const fileInput = document.getElementById('file-input');
+    const fileNameDisplay = document.getElementById('file-name');
+
     let currentMediaId = null;
     let currentPage = 1;
     const mediaPerPage = 20;
 
-    // Funktion zum Anzeigen von Toast-Benachrichtigungen
     const showNotification = (message, type = 'success') => {
         notificationBar.textContent = message;
         notificationBar.className = `notification-bar visible ${type}`;
@@ -72,7 +73,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 3000);
     };
 
-    // Funktion zum Schließen aller Modals
     const closeAllModals = () => {
         document.querySelectorAll('.modal').forEach(modal => {
             modal.classList.remove('visible');
@@ -81,7 +81,6 @@ document.addEventListener('DOMContentLoaded', () => {
         currentMediaId = null;
     };
 
-    // Lazy-Loading-Funktion für Bilder und Videos
     const observer = new IntersectionObserver((entries, observer) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -95,7 +94,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }, { threshold: 0.1 });
 
-    // Funktion zum Rendern der Medien
     const renderMedia = (media) => {
         mediaGrid.innerHTML = '';
         if (media.length === 0) {
@@ -137,7 +135,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // Funktion zum Abrufen der Medien vom Backend
     const fetchMedia = async () => {
         loadingSpinner.style.display = 'block';
         mediaGrid.innerHTML = '';
@@ -183,7 +180,6 @@ document.addEventListener('DOMContentLoaded', () => {
         paginationControls.style.display = total > 1 ? 'flex' : 'none';
     };
 
-    // Event-Listener für Login
     loginForm.addEventListener('submit', async (event) => {
         event.preventDefault();
         const password = loginPasswordInput.value;
@@ -208,7 +204,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Event-Listener für Passwortänderung
     changePasswordButton.addEventListener('click', () => {
         changePasswordModal.classList.add('visible');
     });
@@ -244,7 +239,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Event-Listener für die Sidebar
     openSidebarButton.addEventListener('click', () => {
         filterSidebar.classList.add('visible');
         overlay.classList.add('visible');
@@ -258,7 +252,6 @@ document.addEventListener('DOMContentLoaded', () => {
         overlay.classList.remove('visible');
     });
 
-    // Event-Listener für die Paginierung
     prevPageButton.addEventListener('click', () => {
         if (currentPage > 1) {
             currentPage--;
@@ -270,7 +263,6 @@ document.addEventListener('DOMContentLoaded', () => {
         fetchMedia();
     });
 
-    // Event-Listener für die Medien-Grid-Ansicht
     mediaGrid.addEventListener('click', async (event) => {
         const mediaCard = event.target.closest('.media-card');
         if (mediaCard) {
@@ -305,15 +297,28 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Event-Listener für den Upload-Button
-    const showUploadModal = () => uploadModal.classList.add('visible');
+    const showUploadModal = () => {
+        uploadModal.classList.add('visible');
+        fileNameDisplay.textContent = ''; // Dateinamen beim Öffnen zurücksetzen
+    };
     uploadButton.addEventListener('click', showUploadModal);
     uploadButtonMobile.addEventListener('click', showUploadModal);
     uploadCloseButton.addEventListener('click', closeAllModals);
+    modalCloseButton.addEventListener('click', closeAllModals);
+    editCloseButton.addEventListener('click', closeAllModals);
+    changePasswordCloseButton.addEventListener('click', closeAllModals);
+
+    // NEU: Event-Listener für den Datei-Input, um den Dateinamen anzuzeigen
+    fileInput.addEventListener('change', () => {
+        if (fileInput.files.length > 0) {
+            fileNameDisplay.textContent = fileInput.files[0].name;
+        } else {
+            fileNameDisplay.textContent = '';
+        }
+    });
 
     uploadForm.addEventListener('submit', async (event) => {
         event.preventDefault();
-        const fileInput = document.getElementById('file-input');
         if (!fileInput.files.length) {
             showNotification('Bitte eine Datei auswählen.', 'error');
             return;
@@ -346,7 +351,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Event-Listener für Löschen und Bearbeiten
     deleteButton.addEventListener('click', async () => {
         if (confirm('Bist du sicher, dass du dieses Medium löschen möchtest?')) {
             try {
@@ -398,7 +402,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Event-Listener für die Suche und Filter
     searchBar.addEventListener('input', () => {
         currentPage = 1;
         fetchMedia();
@@ -412,6 +415,5 @@ document.addEventListener('DOMContentLoaded', () => {
         fetchMedia();
     });
 
-    // Initialer Aufruf
     fetchMedia();
 });
