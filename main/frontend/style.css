@@ -10,7 +10,7 @@
 
 /* Global Styles */
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: 'Poppins', sans-serif;
     margin: 0;
     background-color: var(--bg-color);
     color: var(--text-color);
@@ -68,6 +68,11 @@ body {
     border: none;
     font-size: 1em;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.3s;
+}
+#search-bar:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--accent-color);
 }
 
 #upload-button {
@@ -123,6 +128,11 @@ main {
     border: 1px solid var(--border-color);
     border-radius: 5px;
     font-size: 1em;
+    transition: all 0.3s;
+}
+#filter-sidebar input:focus, #filter-sidebar select:focus {
+    outline: none;
+    border-color: var(--accent-color);
 }
 
 /* Media Content Area */
@@ -233,6 +243,18 @@ main {
     font-size: 1em;
     transition: background-color 0.3s;
 }
+.action-button {
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+}
+.delete-button {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+}
+.action-button:hover { background-color: #37a075; }
+.delete-button:hover { background-color: #c0392b; }
 
 /* Formular-Elemente */
 #upload-form label, #edit-form label {
@@ -247,6 +269,12 @@ main {
     margin-top: 5px;
     width: 100%;
     box-sizing: border-box;
+    transition: all 0.3s;
+}
+#upload-form input:focus, #edit-form input:focus, #upload-form textarea:focus, #edit-form textarea:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px rgba(66, 185, 131, 0.2);
 }
 
 /* Pagination & Ladezustände */
@@ -318,6 +346,11 @@ main {
 /* Responsive */
 @media (max-width: 900px) {
     .hero { padding: 40px 15px; }
+    .hero h1 { font-size: 2em; }
+    .hero p { font-size: 1em; }
+    .header-controls { flex-direction: column; }
+    #search-bar { width: 100%; }
+
     #filter-sidebar {
         position: fixed;
         left: 0;
@@ -344,13 +377,14 @@ main {
     }
     .filter-content { display: none; }
     #filter-sidebar.visible .filter-content { display: block; }
-
     main {
         flex-direction: column;
         padding-top: 0;
     }
-    #media-content {
-        padding-top: 20px;
+    #media-content { padding-top: 20px; }
+
+    .modal-content {
+        padding: 20px;
     }
 }
 @media (min-width: 901px) {
