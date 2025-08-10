@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // HINWEIS: Ersetzen Sie die URL mit der URL Ihres Render-Backends
     const backendBaseUrl = 'https://hahaha-fbgk.onrender.com';
     const mediaGrid = document.getElementById('media-grid');
     const searchBar = document.getElementById('search-bar');
@@ -12,6 +11,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const uploadModal = document.getElementById('upload-modal');
     const uploadCloseButton = document.getElementById('upload-close-button');
     const uploadForm = document.getElementById('upload-form');
+    const uploadProgressContainer = document.getElementById('upload-progress-container');
+    const uploadProgressBar = document.getElementById('upload-progress-bar');
 
     const mediaModal = document.getElementById('media-modal');
     const modalCloseButton = document.getElementById('modal-close-button');
@@ -36,13 +37,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const pageInfoSpan = document.getElementById('page-info');
 
     const filterSidebar = document.getElementById('filter-sidebar');
-    const toggleFilterButton = document.getElementById('toggle-filter-button');
+    const openSidebarButton = document.getElementById('open-sidebar-button');
+    const closeSidebarButton = document.getElementById('close-sidebar-button');
+    const overlay = document.getElementById('overlay');
 
     const notificationBar = document.getElementById('notification-bar');
 
     let currentMediaId = null;
     let currentPage = 1;
     const mediaPerPage = 20;
+
+    const observer = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const img = entry.target;
+                img.src = img.dataset.src;
+                img.classList.add('loaded');
+                observer.unobserve(img);
+            }
+        });
+    }, { threshold: 0.1 });
 
     const showNotification = (message, type = 'success') => {
         notificationBar.textContent = message;
@@ -92,12 +106,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (item.type === 'image') {
                 mediaElement = document.createElement('img');
-                mediaElement.src = src;
+                mediaElement.dataset.src = src;
                 mediaElement.alt = item.title;
             } else {
                 mediaElement = document.createElement('video');
-                mediaElement.src = src;
-                mediaElement.poster = item.thumbnail || 'fallback-thumbnail.png'; // Fallback
+                mediaElement.dataset.src = src;
+                mediaElement.poster = item.thumbnail || 'fallback-thumbnail.png';
                 mediaElement.alt = `Thumbnail für ${item.title}`;
             }
 
@@ -108,6 +122,8 @@ document.addEventListener('DOMContentLoaded', () => {
             mediaCard.appendChild(mediaElement);
             mediaCard.appendChild(mediaInfo);
             mediaGrid.appendChild(mediaCard);
+
+            observer.observe(mediaElement);
         });
     };
 
@@ -156,6 +172,20 @@ document.addEventListener('DOMContentLoaded', () => {
         currentMediaId = null;
     };
 
+    // Sidebar-Logik für Mobilgeräte
+    openSidebarButton.addEventListener('click', () => {
+        filterSidebar.classList.add('visible');
+        overlay.classList.add('visible');
+    });
+    closeSidebarButton.addEventListener('click', () => {
+        filterSidebar.classList.remove('visible');
+        overlay.classList.remove('visible');
+    });
+    overlay.addEventListener('click', () => {
+        filterSidebar.classList.remove('visible');
+        overlay.classList.remove('visible');
+    });
+
     prevPageButton.addEventListener('click', () => {
         if (currentPage > 1) {
             currentPage--;
@@ -166,10 +196,6 @@ document.addEventListener('DOMContentLoaded', () => {
     nextPageButton.addEventListener('click', () => {
         currentPage++;
         fetchMedia();
-    });
-
-    toggleFilterButton.addEventListener('click', () => {
-        filterSidebar.classList.toggle('visible');
     });
 
     mediaGrid.addEventListener('click', async (event) => {
@@ -229,14 +255,8 @@ document.addEventListener('DOMContentLoaded', () => {
         formData.append('tags', uploadForm['tags-input'].value);
         formData.append('description', uploadForm['description-input'].value);
 
-        if (fileInput.files[0].type.startsWith('video/')) {
-            try {
-                const thumbnailDataUrl = await createVideoThumbnail(fileInput.files[0]);
-                formData.append('thumbnail', thumbnailDataUrl);
-            } catch (error) {
-                console.error(error);
-            }
-        }
+        // Zeigt den Fortschrittsbalken an
+        uploadProgressContainer.style.display = 'block';
 
         try {
             await fetch(`${backendBaseUrl}/api/upload`, {
@@ -251,6 +271,10 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error('Upload fehlgeschlagen:', error);
             showNotification('Upload fehlgeschlagen. Bitte versuche es erneut.', 'error');
+        } finally {
+            // Setzt den Fortschrittsbalken zurück und versteckt ihn
+            uploadProgressBar.style.width = '0%';
+            uploadProgressContainer.style.display = 'none';
         }
     });
 

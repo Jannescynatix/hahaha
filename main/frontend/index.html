@@ -17,16 +17,15 @@
         <h1>My Media Hub</h1>
         <p>Deine persönliche Mediensammlung – einfach verwalten.</p>
         <div class="header-controls">
-            <input type="text" id="search-bar" placeholder="Suchen...">
-            <button id="upload-button">Upload</button>
+            <input type="text" id="search-bar" placeholder="Suchen..." aria-label="Suche">
         </div>
     </div>
 </header>
 
 <main>
-    <aside id="filter-sidebar">
-        <button id="toggle-filter-button">Filter</button>
-        <div class="filter-content">
+    <div class="main-container">
+        <aside id="filter-sidebar" class="sidebar">
+            <button id="close-sidebar-button" class="close-button">&times;</button>
             <h2>Filter</h2>
             <div class="filter-group">
                 <label for="filter-type">Typ:</label>
@@ -40,24 +39,29 @@
                 <label for="filter-tags">Tags (kommagetrennt):</label>
                 <input type="text" id="filter-tags" placeholder="z.B. Urlaub, Natur">
             </div>
-        </div>
-    </aside>
+        </aside>
 
-    <section id="media-content">
-        <div id="media-grid">
-        </div>
-        <div id="loading-spinner" class="spinner"></div>
-        <div id="no-media-message" class="info-message"></div>
-        <div id="pagination-controls">
-            <button id="prev-page" disabled>Vorherige</button>
-            <span id="page-info">Seite 1 von 1</span>
-            <button id="next-page" disabled>Nächste</button>
-        </div>
-    </section>
+        <section id="media-content">
+            <div class="mobile-controls">
+                <button id="open-sidebar-button" class="sidebar-toggle-button">Filter</button>
+                <button id="upload-button" class="action-button">Upload</button>
+            </div>
+
+            <div id="media-grid">
+            </div>
+            <div id="loading-spinner" class="spinner"></div>
+            <div id="no-media-message" class="info-message"></div>
+            <div id="pagination-controls">
+                <button id="prev-page" disabled>Vorherige</button>
+                <span id="page-info">Seite 1 von 1</span>
+                <button id="next-page" disabled>Nächste</button>
+            </div>
+        </section>
+    </div>
 </main>
 
 <div id="media-modal" class="modal">
-    <div class="modal-content">
+    <div class="modal-content media-view-modal">
         <span class="close-button" id="modal-close-button">&times;</span>
         <div id="modal-viewer"></div>
         <div id="modal-info">
@@ -74,7 +78,7 @@
 </div>
 
 <div id="upload-modal" class="modal">
-    <div class="modal-content">
+    <div class="modal-content upload-modal">
         <span class="close-button" id="upload-close-button">&times;</span>
         <h2>Medien hochladen</h2>
         <form id="upload-form">
@@ -86,13 +90,16 @@
             <input type="text" id="tags-input">
             <label for="description-input">Beschreibung:</label>
             <textarea id="description-input"></textarea>
+            <div id="upload-progress-container" class="progress-container">
+                <div id="upload-progress-bar" class="progress-bar"></div>
+            </div>
             <button type="submit">Hochladen</button>
         </form>
     </div>
 </div>
 
 <div id="edit-modal" class="modal">
-    <div class="modal-content">
+    <div class="modal-content edit-modal">
         <span class="close-button" id="edit-close-button">&times;</span>
         <h2>Medium bearbeiten</h2>
         <form id="edit-form">
@@ -108,6 +115,8 @@
 </div>
 
 <div id="notification-bar" class="notification-bar"></div>
+
+<div id="overlay" class="overlay"></div>
 
 <script>
     if ('serviceWorker' in navigator) {
