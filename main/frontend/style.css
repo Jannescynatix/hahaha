@@ -27,9 +27,6 @@ body {
 #app-container.hidden {
     display: none;
 }
-.mobile-hidden {
-    display: none;
-}
 
 /* Header (Hero Section) */
 .hero {
@@ -107,7 +104,7 @@ body {
 }
 .sidebar input:focus, .sidebar select:focus, .sidebar textarea:focus { outline: none; border-color: var(--accent-color); }
 
-/* NEU: Verbessertes Styling für den Schließen-Button */
+/* Verbessertes Styling für den Schließen-Button */
 .close-button {
     position: absolute; top: 10px; right: 10px; font-size: 1.5em; color: var(--light-text-color);
     cursor: pointer; transition: color 0.2s, transform 0.2s;
@@ -117,6 +114,7 @@ body {
     color: var(--text-color);
     transform: rotate(90deg);
 }
+
 /* Media Content Area */
 #media-content {
     flex-grow: 1; display: flex; flex-direction: column;
@@ -194,7 +192,7 @@ body {
     height: 10px; width: 0; background-color: var(--accent-color); border-radius: 5px; transition: width 0.3s ease;
 }
 
-/* NEU: Styling für den Datei-Input */
+/* Styling für den Datei-Input */
 .file-input-wrapper {
     position: relative;
     overflow: hidden;
@@ -264,13 +262,29 @@ body {
 .overlay.visible { display: block; }
 
 /* Responsive */
+/* Desktop-Ansicht (größer als 900px) */
+@media (min-width: 901px) {
+    .header-controls {
+        display: flex; /* Sicherstellen, dass die Header-Buttons sichtbar sind */
+    }
+    #upload-button-mobile,
+    #open-sidebar-button {
+        display: none; /* Mobile Buttons ausblenden */
+    }
+}
+
+/* Mobile-Ansicht (kleiner oder gleich 900px) */
 @media (max-width: 900px) {
     .hero { padding: 40px 15px; }
     .hero h1 { font-size: 2em; }
     .hero p { font-size: 1em; }
-    .header-controls { display: none; }
-    .mobile-controls { display: flex; }
-    #upload-button-mobile { display: block; }
+
+    .header-controls {
+        display: none; /* Desktop-Buttons ausblenden */
+    }
+    .mobile-controls {
+        display: flex; /* Mobile Controls sichtbar machen */
+    }
 
     .main-container { flex-direction: column; }
     .sidebar {
@@ -283,13 +297,4 @@ body {
     #media-content { padding-top: 0; }
     .modal-content { padding: 20px; width: 95%; max-height: 95vh; flex-direction: column; }
     .media-view-modal { overflow-y: auto; }
-}
-@media (min-width: 901px) {
-    .sidebar.visible { transform: none; }
-    #open-sidebar-button, #upload-button-mobile { display: none; }
-    #upload-button { display: block; }
-    .main-container { padding-top: 20px; }
-    #media-content { padding-top: 0; }
-    .sidebar { height: calc(100vh - 120px); }
-    .header-controls { display: flex; }
 }
